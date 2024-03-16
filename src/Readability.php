@@ -1039,8 +1039,7 @@ class Readability implements LoggerAwareInterface
                         }
                     }
 
-                    if ($this->hasSingleTagInsideElement($node, 'p') && $this->getLinkDensity($node) < 0.25) {
-                        $newNode = $node->childNodes->item(0);
+                    if (($newNode = $this->getSingleTagInsideElement($node, 'p')) !== null && $this->getLinkDensity($node) < 0.25) {
                         $node->parentNode->replaceChild($newNode, $node);
                         $nodesToScore[] = $newNode;
                     }
@@ -1530,10 +1529,10 @@ class Readability implements LoggerAwareInterface
 
     /**
      * Checks if `$node` has only whitespace and a single element with `$tag` for the tag name.
-     * Returns false if `$node` contains non-empty text nodes
+     * Returns the matched element, or `null` if `$node` contains non-empty text nodes
      * or if it contains no element with given tag or more than 1 element.
      */
-    private function hasSingleTagInsideElement(\DOMElement $node, string $tag): bool
+    private function getSingleTagInsideElement(\DOMElement $node, string $tag): ?\DOMElement
     {
         $childNodes = iterator_to_array($node->childNodes);
         $children = array_filter($childNodes, fn ($childNode) => $childNode instanceof \DOMElement);
@@ -1549,7 +1548,7 @@ class Readability implements LoggerAwareInterface
             fn ($childNode) => $childNode instanceof \DOMText && preg_match($this->regexps['hasContent'], $this->getInnerText($childNode))
         );
 
-        return 0 === \count($a);
+        return 0 === \count($a) ? $children[0] : null;
     }
 
     /**
