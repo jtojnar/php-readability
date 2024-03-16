@@ -5,8 +5,10 @@
 
 namespace Readability;
 
+use DOMElement;
+
 /**
- * Wrapper for DOMElement adding methods for accessing string representation of inner HTML contents.
+ * Helpers for accessing string representation of inner HTML contents of a DOMElement.
  *
  * Inspired by JavaScript innerHTML property.
  * https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML
@@ -19,27 +21,29 @@ namespace Readability;
  * $elem = $doc->getElementsByTagName('div')->item(0);
  *
  * // Get inner HTML
- * assert($elem->getInnerHtml() === '<p>Para 1</p><p>Para 2</p>');
+ * assert(InnerHtml::get($elem === '<p>Para 1</p><p>Para 2</p>');
  *
  * // Set inner HTML
- * $elem->setInnerHtml('<a href="http://fivefilters.org">FiveFilters.org</a>');
- * assert($elem->getInnerHtml() === '<a href="http://fivefilters.org">FiveFilters.org</a>');
+ * InnerHtml::set($elem, '<a href="http://fivefilters.org">FiveFilters.org</a>');
+ * assert(InnerHtml::get($elem === '<a href="http://fivefilters.org">FiveFilters.org</a>');
  *
  * // print document (with our changes)
  * echo $doc->saveXML();
  * ```
+ *
+ * @internal Helpers until <https://wiki.php.net/rfc/dom_additions_84#elementinnerhtml> is widely supported.
  */
-final class JSLikeHTMLElement extends \DOMElement
+final class InnerHtml
 {
     /**
      * Sets inner HTML.
      */
-    public function setInnerHtml(string $value): void
+    public static function set(\DOMElement $element, string $value): void
     {
         // first, empty the element
-        if (isset($this->childNodes)) {
-            for ($x = $this->childNodes->length - 1; $x >= 0; --$x) {
-                $this->removeChild($this->childNodes->item($x));
+        if (isset($element->childNodes)) {
+            for ($x = $element->childNodes->length - 1; $x >= 0; --$x) {
+                $element->removeChild($element->childNodes->item($x));
             }
         }
 
@@ -52,13 +56,13 @@ final class JSLikeHTMLElement extends \DOMElement
         // ensure bad entity won't generate warning
         $previousError = libxml_use_internal_errors(true);
 
-        $f = $this->ownerDocument->createDocumentFragment();
+        $f = $element->ownerDocument->createDocumentFragment();
 
         // appendXML() expects well-formed markup (XHTML)
         $result = $f->appendXML($value);
         if ($result) {
             if ($f->hasChildNodes()) {
-                $this->appendChild($f);
+                $element->appendChild($f);
             }
         } else {
             // $value is probably ill-formed
@@ -75,8 +79,8 @@ final class JSLikeHTMLElement extends \DOMElement
                 $import = $f->getElementsByTagName('htmlfragment')->item(0);
 
                 foreach ($import->childNodes as $child) {
-                    $importedNode = $this->ownerDocument->importNode($child, true);
-                    $this->appendChild($importedNode);
+                    $importedNode = $element->ownerDocument->importNode($child, true);
+                    $element->appendChild($importedNode);
                 }
             }
         }
@@ -88,13 +92,13 @@ final class JSLikeHTMLElement extends \DOMElement
     /**
      * Gets inner HTML.
      */
-    public function getInnerHtml(): string
+    public static function get(\DOMElement $element): string
     {
         $inner = '';
 
-        if (isset($this->childNodes)) {
-            foreach ($this->childNodes as $child) {
-                $inner .= $this->ownerDocument->saveXML($child);
+        if (isset($element->childNodes)) {
+            foreach ($element->childNodes as $child) {
+                $inner .= $element->ownerDocument->saveXML($child);
             }
         }
 

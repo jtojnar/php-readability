@@ -2,9 +2,11 @@
 
 namespace Tests\Readability;
 
+use DOMElement;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
+use Readability\InnerHtml;
 use Readability\Readability;
 
 class ReadabilityTest extends \PHPUnit\Framework\TestCase
@@ -77,8 +79,8 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertFalse($res);
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('Sorry, Readability was unable to parse this page for content.', $readability->getContent()->getInnerHtml());
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('Sorry, Readability was unable to parse this page for content.', InnerHtml::get($readability->getContent()));
     }
 
     public function testInitP(): void
@@ -87,9 +89,9 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('<div readability=', $readability->getContent()->getInnerHtml());
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is the awesome content :)', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('<div readability=', InnerHtml::get($readability->getContent()));
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is the awesome content :)', InnerHtml::get($readability->getContent()));
     }
 
     public function testInitDivP(): void
@@ -98,9 +100,9 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('<div readability=', $readability->getContent()->getInnerHtml());
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is the awesome content :)', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('<div readability=', InnerHtml::get($readability->getContent()));
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is the awesome content :)', InnerHtml::get($readability->getContent()));
     }
 
     public function testInitDiv(): void
@@ -109,9 +111,9 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('<div readability=', $readability->getContent()->getInnerHtml());
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is the awesome content :)', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('<div readability=', InnerHtml::get($readability->getContent()));
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is the awesome content :)', InnerHtml::get($readability->getContent()));
     }
 
     public function testWithFootnotes(): void
@@ -121,11 +123,11 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('<div readability=', $readability->getContent()->getInnerHtml());
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringContainsString('readabilityFootnoteLink', $readability->getContent()->getInnerHtml());
-        $this->assertStringContainsString('readabilityLink-3', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('<div readability=', InnerHtml::get($readability->getContent()));
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringContainsString('readabilityFootnoteLink', InnerHtml::get($readability->getContent()));
+        $this->assertStringContainsString('readabilityLink-3', InnerHtml::get($readability->getContent()));
     }
 
     public function testStandardClean(): void
@@ -135,11 +137,11 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('<div readability=', $readability->getContent()->getInnerHtml());
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringContainsString('will NOT be removed', $readability->getContent()->getInnerHtml());
-        $this->assertStringNotContainsString('<h2>', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('<div readability=', InnerHtml::get($readability->getContent()));
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringContainsString('will NOT be removed', InnerHtml::get($readability->getContent()));
+        $this->assertStringNotContainsString('<h2>', InnerHtml::get($readability->getContent()));
     }
 
     public function testWithIframe(): void
@@ -148,10 +150,10 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('<div readability=', $readability->getContent()->getInnerHtml());
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringContainsString('nofollow', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('<div readability=', InnerHtml::get($readability->getContent()));
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringContainsString('nofollow', InnerHtml::get($readability->getContent()));
     }
 
     public function testWithArticle(): void
@@ -160,10 +162,10 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('alt="article"', $readability->getContent()->getInnerHtml());
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringContainsString('nofollow', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('alt="article"', InnerHtml::get($readability->getContent()));
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringContainsString('nofollow', InnerHtml::get($readability->getContent()));
     }
 
     public function testWithAside(): void
@@ -172,10 +174,10 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringNotContainsString('<aside>', $readability->getContent()->getInnerHtml());
-        $this->assertStringContainsString('<footer readability="9"/>', $readability->getContent()->getInnerHtml());
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringNotContainsString('<aside>', InnerHtml::get($readability->getContent()));
+        $this->assertStringContainsString('<footer readability="9"/>', InnerHtml::get($readability->getContent()));
     }
 
     public function testWithClasses(): void
@@ -184,10 +186,10 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('alt="article"', $readability->getContent()->getInnerHtml());
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringNotContainsString('This text should be removed', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('alt="article"', InnerHtml::get($readability->getContent()));
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringNotContainsString('This text should be removed', InnerHtml::get($readability->getContent()));
     }
 
     public function testWithClassesWithoutLightClean(): void
@@ -197,10 +199,10 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('alt="article"', $readability->getContent()->getInnerHtml());
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringNotContainsString('This text should be removed', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('alt="article"', InnerHtml::get($readability->getContent()));
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringNotContainsString('This text should be removed', InnerHtml::get($readability->getContent()));
     }
 
     public function testWithTd(): void
@@ -209,8 +211,8 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
     }
 
     public function testWithSameClasses(): void
@@ -219,9 +221,9 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringContainsString('This text is also an awesome text and you should know that', $readability->getContent()->getInnerHtml());
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringContainsString('This text is also an awesome text and you should know that', InnerHtml::get($readability->getContent()));
     }
 
     public function testWithScript(): void
@@ -230,9 +232,9 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertEmpty($readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringNotContainsString('This text is also an awesome text and you should know that', $readability->getContent()->getInnerHtml());
+        $this->assertEmpty(InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringNotContainsString('This text is also an awesome text and you should know that', InnerHtml::get($readability->getContent()));
     }
 
     public function testTitle(): void
@@ -241,9 +243,9 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertSame('this is my title', $readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringNotContainsString('This text is also an awesome text and you should know that', $readability->getContent()->getInnerHtml());
+        $this->assertSame('this is my title', InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringNotContainsString('This text is also an awesome text and you should know that', InnerHtml::get($readability->getContent()));
     }
 
     public function testTitleWithDash(): void
@@ -252,9 +254,9 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertSame('title2 - title3', $readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringNotContainsString('This text is also an awesome text and you should know that', $readability->getContent()->getInnerHtml());
+        $this->assertSame('title2 - title3', InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringNotContainsString('This text is also an awesome text and you should know that', InnerHtml::get($readability->getContent()));
     }
 
     public function testTitleWithDoubleDot(): void
@@ -263,9 +265,9 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertSame('title2 : title3', $readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringNotContainsString('This text is also an awesome text and you should know that', $readability->getContent()->getInnerHtml());
+        $this->assertSame('title2 : title3', InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringNotContainsString('This text is also an awesome text and you should know that', InnerHtml::get($readability->getContent()));
     }
 
     public function testTitleTooShortUseH1(): void
@@ -274,9 +276,9 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertSame('this is my h1 title !', $readability->getTitle()->getInnerHtml());
-        $this->assertStringContainsString('This is an awesome text with some links, here there are', $readability->getContent()->getInnerHtml());
-        $this->assertStringNotContainsString('This text is also an awesome text and you should know that', $readability->getContent()->getInnerHtml());
+        $this->assertSame('this is my h1 title !', InnerHtml::get($readability->getTitle()));
+        $this->assertStringContainsString('This is an awesome text with some links, here there are', InnerHtml::get($readability->getContent()));
+        $this->assertStringNotContainsString('This text is also an awesome text and you should know that', InnerHtml::get($readability->getContent()));
     }
 
     public function testAutoClosingIframeNotThrowingException(): void
@@ -319,8 +321,8 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
             $res = $readability->init();
 
             $this->assertTrue($res);
-            $this->assertStringContainsString('<iframe src="https://www.youtube.com/embed/PUep6xNeKjA" width="560" height="315" frameborder="0" allowfullscreen="allowfullscreen"> </iframe>', $readability->getContent()->getInnerHtml());
-            $this->assertStringContainsString('3D Touch', $readability->getTitle()->getInnerHtml());
+            $this->assertStringContainsString('<iframe src="https://www.youtube.com/embed/PUep6xNeKjA" width="560" height="315" frameborder="0" allowfullscreen="allowfullscreen"> </iframe>', InnerHtml::get($readability->getContent()));
+            $this->assertStringContainsString('3D Touch', InnerHtml::get($readability->getTitle()));
         } finally {
             restore_error_handler();
             if (false !== $oldDisplayErrors) {
@@ -394,7 +396,7 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('This  the awesome content :)', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('This  the awesome content :)', InnerHtml::get($readability->getContent()));
     }
 
     public function testPreFilters(): void
@@ -405,7 +407,7 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('This the awesome and WONDERFUL content :)', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('This the awesome and WONDERFUL content :)', InnerHtml::get($readability->getContent()));
     }
 
     public function testChildNodeGoneNull(): void
@@ -429,8 +431,8 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('<sup id="fnref1:fnfeed_2"><a href="#fn:fnfeed_2" class="footnote-ref">2</a></sup>', $readability->getContent()->getInnerHtml());
-        $this->assertStringContainsString('<a href="#fnref1:fnfeed_2" rev="footnote"', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('<sup id="fnref1:fnfeed_2"><a href="#fn:fnfeed_2" class="footnote-ref">2</a></sup>', InnerHtml::get($readability->getContent()));
+        $this->assertStringContainsString('<a href="#fnref1:fnfeed_2" rev="footnote"', InnerHtml::get($readability->getContent()));
     }
 
     public function testWithWipedBody(): void
@@ -442,7 +444,7 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         $this->assertTrue($res);
-        $this->assertStringContainsString('<a href="alice-I.html">Down the Rabbit-Hole</a>', $readability->getContent()->getInnerHtml());
+        $this->assertStringContainsString('<a href="alice-I.html">Down the Rabbit-Hole</a>', InnerHtml::get($readability->getContent()));
     }
 
     public function dataForVisibleNode(): array
@@ -480,9 +482,9 @@ class ReadabilityTest extends \PHPUnit\Framework\TestCase
         $res = $readability->init();
 
         if ($shouldBeVisible) {
-            $this->assertStringContainsString('WONDERFUL content', $readability->getContent()->getInnerHtml());
+            $this->assertStringContainsString('WONDERFUL content', InnerHtml::get($readability->getContent()));
         } else {
-            $this->assertStringNotContainsString('WONDERFUL content', $readability->getContent()->getInnerHtml());
+            $this->assertStringNotContainsString('WONDERFUL content', InnerHtml::get($readability->getContent()));
         }
     }
 

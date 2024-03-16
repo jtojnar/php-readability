@@ -266,7 +266,7 @@ class Readability implements LoggerAwareInterface
         if (null === $this->bodyCache) {
             $this->bodyCache = '';
             foreach ($bodyElems as $bodyNode) {
-                $this->bodyCache .= trim($bodyNode->getInnerHTML());
+                $this->bodyCache .= trim(InnerHtml::get($bodyNode));
             }
         }
 
@@ -286,7 +286,7 @@ class Readability implements LoggerAwareInterface
             $this->success = false;
             $articleContent = $this->dom->createElement('div');
             $articleContent->setAttribute('class', 'readability-content');
-            $articleContent->setInnerHtml('<p>Sorry, Readability was unable to parse this page for content.</p>');
+            InnerHtml::set($articleContent, '<p>Sorry, Readability was unable to parse this page for content.</p>');
         }
 
         $overlay->setAttribute('class', 'readOverlay');
@@ -303,7 +303,7 @@ class Readability implements LoggerAwareInterface
         }
 
         // Clear the old HTML, insert the new content.
-        $this->body->setInnerHtml('');
+        InnerHtml::set($this->body, '');
         $this->body->appendChild($overlay);
         $this->body->removeAttribute('style');
         $this->postProcessContent($articleContent);
@@ -334,7 +334,7 @@ class Readability implements LoggerAwareInterface
     {
         $footnotesWrapper = $this->dom->createElement('footer');
         $footnotesWrapper->setAttribute('class', 'readability-footnotes');
-        $footnotesWrapper->setInnerHtml('<h3>References</h3>');
+        InnerHtml::set($footnotesWrapper, '<h3>References</h3>');
         $articleFootnotes = $this->dom->createElement('ol');
         $articleFootnotes->setAttribute('class', 'readability-footnotes-list');
         $footnotesWrapper->appendChild($articleFootnotes);
@@ -359,7 +359,7 @@ class Readability implements LoggerAwareInterface
 
             // Add a superscript reference after the article link.
             $refLink->setAttribute('href', '#readabilityFootnoteLink-' . $linkCount);
-            $refLink->setInnerHtml('<small><sup>[' . $linkCount . ']</sup></small>');
+            InnerHtml::set($refLink, '<small><sup>[' . $linkCount . ']</sup></small>');
             $refLink->setAttribute('class', 'readability-DoNotFootnote');
             $refLink->setAttribute('style', 'color: inherit;');
 
@@ -371,13 +371,13 @@ class Readability implements LoggerAwareInterface
 
             $articleLink->setAttribute('style', 'color: inherit; text-decoration: none;');
             $articleLink->setAttribute('name', 'readabilityLink-' . $linkCount);
-            $footnote->setInnerHtml('<small><sup><a href="#readabilityLink-' . $linkCount . '" title="Jump to Link in Article">^</a></sup></small> ');
-            $footnoteLink->setInnerHtml('' !== $footnoteLink->getAttribute('title') ? $footnoteLink->getAttribute('title') : $linkText);
+            InnerHtml::set($footnote, '<small><sup><a href="#readabilityLink-' . $linkCount . '" title="Jump to Link in Article">^</a></sup></small> ');
+            InnerHtml::set($footnoteLink, '' !== $footnoteLink->getAttribute('title') ? $footnoteLink->getAttribute('title') : $linkText);
             $footnoteLink->setAttribute('name', 'readabilityFootnoteLink-' . $linkCount);
             $footnote->appendChild($footnoteLink);
 
             if ($linkDomain) {
-                $footnote->setInnerHtml($footnote->getInnerHTML() . '<small> (' . $linkDomain . ')</small>');
+                InnerHtml::set($footnote, InnerHtml::get($footnote) . '<small> (' . $linkDomain . ')</small>');
             }
             $articleFootnotes->appendChild($footnote);
         }
@@ -480,7 +480,7 @@ class Readability implements LoggerAwareInterface
         if (!$this->flagIsActive(self::FLAG_DISABLE_POSTFILTER)) {
             try {
                 foreach ($this->post_filters as $search => $replace) {
-                    $articleContent->setInnerHtml(preg_replace($search, $replace, $articleContent->getInnerHTML()));
+                    InnerHtml::set($articleContent, preg_replace($search, $replace, InnerHtml::get($articleContent)));
                 }
                 unset($search, $replace);
             } catch (\Exception $e) {
@@ -592,9 +592,9 @@ class Readability implements LoggerAwareInterface
      */
     public function killBreaks(JSLikeHTMLElement $node): void
     {
-        $html = $node->getInnerHTML();
+        $html = InnerHtml::get($node);
         $html = preg_replace($this->regexps['killBreaks'], '<br />', $html);
-        $node->setInnerHtml($html);
+        InnerHtml::set($node, $html);
     }
 
     /**
@@ -621,7 +621,7 @@ class Readability implements LoggerAwareInterface
                 }
 
                 // Then check the elements inside this element for the same.
-                if (preg_match($this->regexps['media'], $currentItem->getInnerHTML())) {
+                if (preg_match($this->regexps['media'], InnerHtml::get($currentItem))) {
                     continue;
                 }
             }
@@ -821,7 +821,7 @@ class Readability implements LoggerAwareInterface
         }
 
         $articleTitle = $this->dom->createElement('h1');
-        $articleTitle->setInnerHtml($curTitle);
+        InnerHtml::set($articleTitle, $curTitle);
 
         return $articleTitle;
     }
@@ -951,7 +951,7 @@ class Readability implements LoggerAwareInterface
             $node = $allElements->item($nodeIndex);
             $tagName = $node->tagName;
 
-            $nodeContent = $node->getInnerHTML();
+            $nodeContent = InnerHtml::get($node);
             if (empty($nodeContent)) {
                 $this->logger->debug('Skipping empty node');
                 continue;
@@ -990,7 +990,7 @@ class Readability implements LoggerAwareInterface
                     $newNode = $this->dom->createElement('p');
 
                     try {
-                        $newNode->setInnerHtml($nodeContent);
+                        InnerHtml::set($newNode, $nodeContent);
 
                         $node->parentNode->replaceChild($newNode, $node);
                         --$nodeIndex;
@@ -1170,14 +1170,14 @@ class Readability implements LoggerAwareInterface
                     $this->logger->debug('The page has no body!');
                 } else {
                     $this->logger->debug('Setting body to a raw HTML of original page!');
-                    $topCandidate->setInnerHtml($page->documentElement->getInnerHTML());
-                    $page->documentElement->setInnerHtml('');
+                    InnerHtml::set($topCandidate, InnerHtml::get($page->documentElement));
+                    InnerHtml::set($page->documentElement, '');
                     $this->reinitBody();
                     $page->documentElement->appendChild($topCandidate);
                 }
             } else {
-                $topCandidate->setInnerHtml($page->getInnerHTML());
-                $page->setInnerHtml('');
+                InnerHtml::set($topCandidate, InnerHtml::get($page));
+                InnerHtml::set($page, '');
                 $page->appendChild($topCandidate);
             }
 
@@ -1303,7 +1303,7 @@ class Readability implements LoggerAwareInterface
 
                     try {
                         $nodeToAppend->setAttribute('alt', $siblingNodeName);
-                        $nodeToAppend->setInnerHtml($siblingNode->getInnerHTML());
+                        InnerHtml::set($nodeToAppend, InnerHtml::get($siblingNode));
                     } catch (\Exception $e) {
                         $this->logger->debug('Could not alter siblingNode "' . $siblingNodeName . '" to "div", reverting to original.');
                         $nodeToAppend = $siblingNode;
@@ -1401,7 +1401,7 @@ class Readability implements LoggerAwareInterface
     {
         if (!isset($this->body->childNodes)) {
             $this->body = $this->dom->createElement('body');
-            $this->body->setInnerHtml($this->bodyCache);
+            InnerHtml::set($this->body, $this->bodyCache);
         }
     }
 
@@ -1488,8 +1488,6 @@ class Readability implements LoggerAwareInterface
 
             libxml_use_internal_errors(false);
         }
-
-        $this->dom->registerNodeClass(\DOMElement::class, JSLikeHTMLElement::class);
     }
 
     private function getAncestors(\DOMElement $node, int $maxDepth = 0): array
