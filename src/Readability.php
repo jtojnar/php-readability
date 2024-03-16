@@ -1543,6 +1543,7 @@ class Readability implements LoggerAwareInterface
             return false;
         }
 
+        // And there should be no text nodes with real content
         $a = array_filter(
             $childNodes,
             fn ($childNode) => $childNode instanceof \DOMText && preg_match($this->regexps['hasContent'], $this->getInnerText($childNode))
